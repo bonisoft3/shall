@@ -1,0 +1,9 @@
+say:
+  build:
+    do: 'glob *.nu | each { |f| nu -c $"source ($f)" }'
+  test:
+    do: "nu shall.test.nu"
+  lint:
+    do: 'open shall.nu --raw | grep (open VERSION | str trim)'
+  verify:
+    do: "mise exec -- pnpm dlx promptfoo eval"

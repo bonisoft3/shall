@@ -1,0 +1,30 @@
+services:
+  ollama:
+    image: ollama/ollama:latest@sha256:5a5d014aa774f78ebe1340c0d4afc2e35afc12a2c3b34c84e71f78ea20af4ba3
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:11434/ || exit 1"]
+
+  model-pull:
+    image: curlimages/curl:8.5.0@sha256:08e466006f0860e54fc299378de998935333e0e130a15f6f98482e9f8dab3058
+    depends_on:
+      ollama:
+        condition: service_healthy
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        curl -sf http://ollama:11434/api/pull -d '{"name":"qwen2.5-coder:7b","stream":false}' \
+          -H 'Content-Type: application/json' --max-time 600
+
+  integrate:
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM chainguard/wolfi-base:latest@sha256:73de6aadd7e28fb516fa1270fcb411b94ee79949635e7de2a4bdb8705f6c120c
+        RUN apk add --no-cache nushell curl
+        WORKDIR /app
+        COPY shall.nu shall.test.nu ./
+        ENV OLLAMA_URL=http://ollama:11434
+        CMD ["nu", "shall.test.nu", "--url", "http://ollama:11434"]
+    depends_on:
+      model-pull:
+        condition: service_completed_successfully
