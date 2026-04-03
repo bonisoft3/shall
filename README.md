@@ -1,45 +1,44 @@
 # shall
 
-AI-powered command approval gate for Claude Code. Uses a local Ollama model to classify shell commands as **allow**, **deny**, or **ask** before execution.
+AI-powered command approval gate for Claude Code. Classifies shell commands as **allow**, **deny**, or **ask** before execution.
 
 ## How it works
 
-shall runs as a Claude Code `PreToolUse` hook. Every Bash command is sent to a local Ollama model (default: `qwen2.5-coder:7b`) which classifies it:
+shall runs as a Claude Code `PreToolUse` hook. Every Bash command is sent to an AI model which classifies it:
 
 - **allow** — normal development commands pass through silently
-- **deny** — dangerous commands are blocked
-- **ask** — ambiguous commands prompt the user for approval
+- **deny** — dangerous commands are blocked (surfaced as "ask" so the human decides)
+- **ask** — ambiguous commands or merge operations prompt the user for approval
+
+Default provider: **Gemini 2.5 Flash Lite** (fast, no battery drain). Falls back to **Ollama** (local, offline-capable) if Gemini is unavailable.
 
 ## Install
 
-### 1. Install dependencies
+### 1. Install nushell
 
 **macOS**
 ```bash
-brew install nushell ollama
+brew install nushell
 ```
 
 **Linux**
 ```bash
-# Nushell
 brew install nushell
 # or: https://www.nushell.sh/book/installation.html
-
-# Ollama
-curl -fsSL https://ollama.com/install.sh | sh
 ```
 
 **Windows**
 ```powershell
-winget install Nushell.Nushell Ollama.Ollama
+winget install Nushell.Nushell
 ```
 
-### 2. Pull the model and start Ollama
+### 2. Set your Gemini API key
 
 ```bash
-ollama pull qwen2.5-coder:7b
-ollama serve  # leave running, or it auto-starts on macOS
+export GEMINI_API_KEY=your-key-here  # add to ~/.bashrc or ~/.zshrc
 ```
+
+Get a free key at [aistudio.google.com](https://aistudio.google.com/apikey).
 
 ### 3. Install the hook
 
@@ -73,32 +72,42 @@ Add to `~/.claude/settings.json` (create the file if it doesn't exist):
 
 That's it. Claude Code will now evaluate every Bash command through the gate.
 
+### Optional: Ollama fallback
+
+For offline use, install Ollama as a fallback:
+
+```bash
+brew install ollama
+ollama pull qwen2.5-coder:7b
+```
+
+shall auto-falls back to Ollama when Gemini is unavailable (no API key, quota exhausted, network down).
+
 ## Model accuracy
 
-Tested with 19 commands (12 allow, 7 deny):
+Tested with 31 commands (23 allow, 1 ask, 7 deny):
 
-| Model | Score | Avg latency | Recommended |
-|-------|-------|-------------|-------------|
-| `qwen2.5-coder:7b` | 19/19 | ~3-5s | Yes |
-| `qwen2.5-coder:3b` | 18/19 | ~1.7s | If speed matters |
-| `gemma3:1b` | 17/19 | ~1s | No |
-| `gemma3:4b` | 16/19 | ~2-3s | No |
+| Model | Score | Avg latency | Provider |
+|-------|-------|-------------|----------|
+| `gemini-2.5-flash-lite` | 31/31 | ~630ms | Gemini (default) |
+| `gemini-2.5-flash` | 31/31 | ~1.9s | Gemini |
+| `qwen2.5-coder:7b` | 31/31 | ~19.7s | Ollama |
+| `gemma3:1b` | 29/31 | ~11.5s | Ollama |
+| `qwen2.5-coder:3b` | 28/31 | ~13.6s | Ollama |
 
 ## Configuration
 
-Edit constants at the top of `shall.nu`:
+Environment variables:
 
-| Constant | Default | Description |
+| Variable | Default | Description |
 |----------|---------|-------------|
-| `MODEL` | `qwen2.5-coder:7b` | Ollama model for classification |
+| `SHALL_PROVIDER` | `gemini` | Provider: `gemini` or `ollama` |
+| `SHALL_FALLBACK` | `true` | Fall back to ollama if gemini fails |
+| `GEMINI_API_KEY` | — | Google AI API key (required for gemini) |
+| `GEMINI_MODEL` | `gemini-2.5-flash-lite` | Gemini model ID |
+| `GEMINI_URL` | `https://generativelanguage.googleapis.com/v1beta` | Gemini API base URL |
+| `OLLAMA_MODEL` | `qwen2.5-coder:7b` | Ollama model for classification |
 | `OLLAMA_URL` | `http://localhost:11434` | Ollama API endpoint |
-| `TIMEOUT` | `15sec` | Max wait for model response |
-
-Override the endpoint via environment variable:
-
-```bash
-export OLLAMA_URL=http://my-gpu-server:11434
-```
 
 ### Tuning the prompt
 
@@ -113,15 +122,18 @@ mise install
 # Syntax check
 sayt build
 
-# Run tests (requires ollama serve)
+# Run tests (default: gemini)
 sayt test   # or: nu shall.test.nu
 
+# Test ollama provider
+nu shall.test.nu --provider ollama
+
 # Test a different model
-nu shall.test.nu --model qwen2.5-coder:3b
+nu shall.test.nu --provider ollama --model qwen2.5-coder:3b
 
 # Prompt optimization (multi-model comparison)
 sayt verify   # runs promptfoo eval
 
-# Integration tests (Docker)
+# Integration tests (Docker, ollama only)
 docker compose run --build integrate
 ```
