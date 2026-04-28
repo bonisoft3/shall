@@ -65,12 +65,23 @@ Add to `~/.claude/settings.json` (create the file if it doesn't exist):
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "nu ~/.claude/hooks/shall.nu"
+          }
+        ]
+      }
     ]
   }
 }
 ```
 
-That's it. Claude Code will now evaluate every Bash command through the gate.
+That's it. Claude Code will now evaluate every Bash command through the gate. The `PostToolUse` entry feeds back which commands actually ran so shall can learn from your manual approvals — see [Learning from your approvals](#learning-from-your-approvals).
 
 ### Optional: Ollama fallback
 
@@ -108,10 +119,24 @@ Environment variables:
 | `GEMINI_URL` | `https://generativelanguage.googleapis.com/v1beta` | Gemini API base URL |
 | `OLLAMA_MODEL` | `qwen2.5-coder:7b` | Ollama model for classification |
 | `OLLAMA_URL` | `http://localhost:11434` | Ollama API endpoint |
+| `SHALL_HISTORY` | `~/.claude/shall-history.jsonl` | Verdict log used for on-the-fly learning |
 
 ### Tuning the prompt
 
 If a command is consistently misclassified, add it as a few-shot example in the `gate_prompt` function in `shall.nu`. Small models are very sensitive to examples — a single added example often fixes an entire class of misclassifications.
+
+### Learning from your approvals
+
+shall keeps a log at `~/.claude/shall-history.jsonl` (one record per Bash call). Every PreToolUse verdict is written with `executed: null`; the PostToolUse hook flips it to `executed: true` once Claude Code actually runs the command.
+
+That gives shall one strong signal: cases where it said **ask** but you approved anyway. On the next call, up to 10 such overrides (deduped by command, newest first) are injected into the prompt as additional `→ allow` examples, so the model nudges toward allowing similar commands automatically.
+
+Caveats:
+
+- Only the **ask → approved** direction is captured. If shall said `allow` and you canceled, that is not currently logged (Claude Code does not fire PostToolUse for canceled tools).
+- The file is rotated to the last 1000 lines once it grows past 1500.
+- To wipe the learned context, delete the file. To inspect it: `tail ~/.claude/shall-history.jsonl | nu --commands 'lines | each { from json } | table'`.
+- Set `SHALL_HISTORY=/dev/null` to disable logging entirely.
 
 ## Development
 
