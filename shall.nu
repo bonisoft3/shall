@@ -10,7 +10,7 @@
 # Disable fallback: $env.SHALL_FALLBACK = "false"
 
 const VERSION = "v0.2.0"
-const TIMEOUT = 10sec
+const TIMEOUT = 30sec
 
 const GEMINI_MODEL = "gemini-2.5-flash-lite"
 const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta"
