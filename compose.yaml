@@ -1,30 +1,54 @@
 services:
   ollama:
-    image: ollama/ollama:latest@sha256:5a5d014aa774f78ebe1340c0d4afc2e35afc12a2c3b34c84e71f78ea20af4ba3
+    # Custom image with the inference model pre-baked into a layer
+    # instead of pulled at runtime. The pull happens during docker
+    # build, so the ~4.7 GB lands in the image's layer cache (which
+    # bake's cache-from / cache-to mirrors across runs). Without
+    # this, every cold integrate run re-downloads the model since
+    # /root/.ollama is anonymous-volume + --renew-anon-volumes.
+    image: shall-ollama-with-qwen25-coder-7b:latest
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM ollama/ollama:latest@sha256:5a5d014aa774f78ebe1340c0d4afc2e35afc12a2c3b34c84e71f78ea20af4ba3
+        # ollama serve must be running for `ollama pull` to deposit
+        # blobs into /root/.ollama/models. Start it in the background,
+        # busy-poll readiness via `ollama list` (the same probe the
+        # runtime healthcheck uses), pull, then stop the daemon. No
+        # sleep: the poll spins for ~1-2s while serve binds.
+        RUN /bin/ollama serve & \
+            server_pid=$$! && \
+            until ollama list >/dev/null 2>&1; do :; done && \
+            ollama pull qwen2.5-coder:7b && \
+            kill $$server_pid
+    environment:
+      # Default is 5m0s — model evicts after 5 min of inactivity. The
+      # warmup + 31 cases at ~110s each takes ~60 min, and any single
+      # case nearing the per-case ceiling can exceed the eviction
+      # window. Keep the model loaded for the entire run; -1 = forever.
+      OLLAMA_KEEP_ALIVE: "-1"
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:11434/ || exit 1"]
-
-  model-pull:
-    image: curlimages/curl:8.5.0@sha256:08e466006f0860e54fc299378de998935333e0e130a15f6f98482e9f8dab3058
-    depends_on:
-      ollama:
-        condition: service_healthy
-    entrypoint: ["sh", "-c"]
-    command:
-      - |
-        curl -sf http://ollama:11434/api/pull -d '{"name":"qwen2.5-coder:7b","stream":false}' \
-          -H 'Content-Type: application/json' --max-time 600
+      # Process-level check instead of an HTTP probe. An HTTP probe
+      # (`ollama list` or `curl /api/tags`) goes through ollama's gin
+      # router which logs every request — multiplied by interval, that
+      # floods compose --attach-dependencies output with `[GIN]` lines
+      # during inactivity. pgrep stays in-kernel and emits nothing.
+      test: ["CMD-SHELL", "pgrep -x ollama >/dev/null"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
 
   integrate:
     build:
       context: .
       dockerfile_inline: |
         FROM chainguard/wolfi-base:latest@sha256:73de6aadd7e28fb516fa1270fcb411b94ee79949635e7de2a4bdb8705f6c120c
-        RUN apk add --no-cache nushell curl
+        RUN apk add --no-cache nushell
         WORKDIR /app
         COPY shall.nu shall.test.nu ./
         ENV OLLAMA_URL=http://ollama:11434
         CMD ["nu", "shall.test.nu", "--url", "http://ollama:11434"]
     depends_on:
-      model-pull:
-        condition: service_completed_successfully
+      ollama:
+        condition: service_healthy

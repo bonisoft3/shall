@@ -13,9 +13,17 @@ x-format: &format
       required: [decision, reason]
 
 providers:
-  - id: ollama:chat:qwen2.5-coder:7b
+  - id: ollama:chat:qwen2.5-coder:7b   # baseline (current passing)
     config: *format
-  - id: ollama:chat:qwen2.5-coder:3b
+  - id: ollama:chat:qwen3:8b
+    config: *format
+  - id: ollama:chat:qwen3:4b
+    config: *format
+  - id: ollama:chat:qwen3:1.7b
+    config: *format
+  - id: ollama:chat:phi4-mini:latest
+    config: *format
+  - id: ollama:chat:smollm2:1.7b
     config: *format
   - id: ollama:chat:gemma3:4b
     config: *format
