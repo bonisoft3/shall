@@ -13,7 +13,7 @@ aqua.slsa = false
 aqua.minisign = false
 
 [tools]
-"github:nushell/nushell" = "0.110.0"
+"github:nushell/nushell" = "0.115.1"
 "aqua:ollama/ollama" = "0.18.3"
 node = "22.14.0"
 "github:pnpm/pnpm" = "9.15.2"
