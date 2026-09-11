@@ -2,7 +2,6 @@
 locked = true
 lockfile = true
 experimental = true
-paranoid = false
 github_attestations = false
 slsa = false
 github.slsa = false
