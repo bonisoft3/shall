@@ -43,8 +43,15 @@ services:
     build:
       context: .
       dockerfile_inline: |
-        FROM chainguard/wolfi-base:latest@sha256:73de6aadd7e28fb516fa1270fcb411b94ee79949635e7de2a4bdb8705f6c120c
-        RUN apk add --no-cache nushell
+        # nushell arrives with the image rather than from a package feed: a
+        # digest-pinned base and a floating `apk add` drift apart, and a
+        # nushell built against a newer glibc than the base carries cannot
+        # run. One digest pins both halves.
+        #
+        # That nushell is the image's (0.110.0), not the .mise.toml pin the
+        # host verbs use (0.115.1) — this suite is the one thing that runs on
+        # both, and it passes on both.
+        FROM bonitao/lazybox@sha256:d94263b75982a5592ac66d36d2d24aa96cd01a4fea55053a36c7baeffdc18f66
         WORKDIR /app
         COPY shall.nu shall.test.nu ./
         ENV OLLAMA_URL=http://ollama:11434
