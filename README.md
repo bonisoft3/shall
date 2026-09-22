@@ -162,3 +162,10 @@ sayt verify   # runs promptfoo eval
 # Integration tests (Docker, ollama only)
 docker compose run --build integrate
 ```
+
+Ollama's content-addressed blobs allow pinning without changing inference
+runtimes. Vendoring `qwen2.5-coder-7b.json` avoids resolving a mutable tag;
+preserve its exact bytes because its hash is Ollama's model ID. Update the
+manifest and the blob URLs and checksums in `ollama.Dockerfile` together.
+Model downloads survive runtime and test changes on ARM64 and AMD64, but a
+fresh builder or a pruned cache still needs the initial download.
