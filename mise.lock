@@ -72,36 +72,43 @@ url = "https://github.com/nushell/nushell/releases/download/0.115.1/nu-0.115.1-x
 url_api = "https://api.github.com/repos/nushell/nushell/releases/assets/526030176"
 
 [[tools."github:pnpm/pnpm"]]
-version = "9.15.2"
+version = "10.32.1"
 backend = "github:pnpm/pnpm"
 
 [tools."github:pnpm/pnpm"."platforms.linux-arm64"]
-url = "https://github.com/pnpm/pnpm/releases/download/v9.15.2/pnpm-linux-arm64"
-url_api = "https://api.github.com/repos/pnpm/pnpm/releases/assets/216187381"
+checksum = "sha256:c0db0b837971fde6f9781af8914e54eb163721193a36d35cbcf1794b3474a407"
+url = "https://github.com/pnpm/pnpm/releases/download/v10.32.1/pnpm-linux-arm64"
+url_api = "https://api.github.com/repos/pnpm/pnpm/releases/assets/371216282"
 
 [tools."github:pnpm/pnpm"."platforms.linux-arm64-musl"]
-url = "https://github.com/pnpm/pnpm/releases/download/v9.15.2/pnpm-linux-arm64"
-url_api = "https://api.github.com/repos/pnpm/pnpm/releases/assets/216187381"
+checksum = "sha256:c0db0b837971fde6f9781af8914e54eb163721193a36d35cbcf1794b3474a407"
+url = "https://github.com/pnpm/pnpm/releases/download/v10.32.1/pnpm-linux-arm64"
+url_api = "https://api.github.com/repos/pnpm/pnpm/releases/assets/371216282"
 
 [tools."github:pnpm/pnpm"."platforms.linux-x64"]
-url = "https://github.com/pnpm/pnpm/releases/download/v9.15.2/pnpm-linux-x64"
-url_api = "https://api.github.com/repos/pnpm/pnpm/releases/assets/216187382"
+checksum = "sha256:c5607a86bfb948297e96b393a53c90107766fe56329e62967b1f239d861d4363"
+url = "https://github.com/pnpm/pnpm/releases/download/v10.32.1/pnpm-linux-x64"
+url_api = "https://api.github.com/repos/pnpm/pnpm/releases/assets/371216286"
 
 [tools."github:pnpm/pnpm"."platforms.linux-x64-musl"]
-url = "https://github.com/pnpm/pnpm/releases/download/v9.15.2/pnpm-linux-x64"
-url_api = "https://api.github.com/repos/pnpm/pnpm/releases/assets/216187382"
+checksum = "sha256:c5607a86bfb948297e96b393a53c90107766fe56329e62967b1f239d861d4363"
+url = "https://github.com/pnpm/pnpm/releases/download/v10.32.1/pnpm-linux-x64"
+url_api = "https://api.github.com/repos/pnpm/pnpm/releases/assets/371216286"
 
 [tools."github:pnpm/pnpm"."platforms.macos-arm64"]
-url = "https://github.com/pnpm/pnpm/releases/download/v9.15.2/pnpm-macos-arm64"
-url_api = "https://api.github.com/repos/pnpm/pnpm/releases/assets/216187376"
+checksum = "sha256:b0904b4e0cf36704fcdc24bcdb5f03388799a631510d1fb0d459ea69c7b1e2d9"
+url = "https://github.com/pnpm/pnpm/releases/download/v10.32.1/pnpm-macos-arm64"
+url_api = "https://api.github.com/repos/pnpm/pnpm/releases/assets/371216291"
 
 [tools."github:pnpm/pnpm"."platforms.macos-x64"]
-url = "https://github.com/pnpm/pnpm/releases/download/v9.15.2/pnpm-macos-x64"
-url_api = "https://api.github.com/repos/pnpm/pnpm/releases/assets/216187378"
+checksum = "sha256:8b83277343bbc400fdb90608bd51b4f56e380e6624ac5fd0e11d6c08815e3f04"
+url = "https://github.com/pnpm/pnpm/releases/download/v10.32.1/pnpm-macos-x64"
+url_api = "https://api.github.com/repos/pnpm/pnpm/releases/assets/371216287"
 
 [tools."github:pnpm/pnpm"."platforms.windows-x64"]
-url = "https://github.com/pnpm/pnpm/releases/download/v9.15.2/pnpm-win-x64.exe"
-url_api = "https://api.github.com/repos/pnpm/pnpm/releases/assets/216187374"
+checksum = "sha256:849141504c83bcd08a3d84dc20d43cff2584d672138d28c33ad62bdac809e7f2"
+url = "https://github.com/pnpm/pnpm/releases/download/v10.32.1/pnpm-win-x64.exe"
+url_api = "https://api.github.com/repos/pnpm/pnpm/releases/assets/371216281"
 
 [[tools.node]]
 version = "22.14.0"
@@ -112,16 +119,15 @@ checksum = "sha256:8cf30ff7250f9463b53c18f89c6c606dfda70378215b2c905d0a9a8b08bd4
 url = "https://nodejs.org/dist/v22.14.0/node-v22.14.0-linux-arm64.tar.gz"
 
 [tools.node."platforms.linux-arm64-musl"]
-checksum = "sha256:8cf30ff7250f9463b53c18f89c6c606dfda70378215b2c905d0a9a8b08bd45e0"
-url = "https://nodejs.org/dist/v22.14.0/node-v22.14.0-linux-arm64.tar.gz"
+url = "https://unofficial-builds.nodejs.org/download/release/v22.14.0/node-v22.14.0-linux-arm64-musl.tar.gz"
 
 [tools.node."platforms.linux-x64"]
 checksum = "sha256:9d942932535988091034dc94cc5f42b6dc8784d6366df3a36c4c9ccb3996f0c2"
 url = "https://nodejs.org/dist/v22.14.0/node-v22.14.0-linux-x64.tar.gz"
 
 [tools.node."platforms.linux-x64-musl"]
-checksum = "sha256:9d942932535988091034dc94cc5f42b6dc8784d6366df3a36c4c9ccb3996f0c2"
-url = "https://nodejs.org/dist/v22.14.0/node-v22.14.0-linux-x64.tar.gz"
+checksum = "sha256:6b50f327fd5053b5e4ba67de4bf93aa23653d8a9de39bd6f905f839069c7933d"
+url = "https://unofficial-builds.nodejs.org/download/release/v22.14.0/node-v22.14.0-linux-x64-musl.tar.gz"
 
 [tools.node."platforms.macos-arm64"]
 checksum = "sha256:e9404633bc02a5162c5c573b1e2490f5fb44648345d64a958b17e325729a5e42"
